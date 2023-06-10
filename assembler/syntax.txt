@@ -1,0 +1,36 @@
+TODO: possibly simplify this to make it less of a pain to write
+
+Leading and trailing whitespace is ignored
+Comments start with ; and must not be inside "", '', or ``
+\ is used for escaping; only applies to ", ', `, and itself when outside of quotations
+
+Data-at-address is indicated by [value], where value is anything valid to be used as an indirect reference
+
+Size of operand is specified by a {number} preceeding its reference, and number is to be specified as the size in bytes
+
+Format for each instruction is <instruction> <param0>, ...
+	Whitespace here can be any amount of either spaces or tabs
+	Commas seperating parameters is optional
+
+Instruction queues are surrounded by { and }:
+{
+	add a, b, c
+	add b, a, c
+}
+
+{ and } must be on their own in the line (aside for whitespace and comments)
+
+Labels are any combination of non-whitespace from the start of the line to a ':', and not followed by any non-comment non-whitespace
+Labels must not be declared inside instruction queues
+If a label includes { or }, it must start with {, then a number, then }, to be used as its default size; all other uses of these characters are invalid
+
+Using the value of the label in a parameter will be '<name of label>:' as the operand, like so:
+	add a, my_data:, b
+	jmp {8}[my_data:]
+
+Constants will have a default size of the minimum amount required to represent it in full, as will labels without a default size explicitly set
+
+The "declare" keyword is to be used like an instruction, but not within an instruction queue
+	It will place the following constant's or label's data into the binary output, for an unlimited number of parameters
+	You may use "<data>" to place the literal value of its contents in the output; \ will only apply to " and itself when within these quotes
+	You may use `<data>` to place an evaluated string into the output; for example \n will be translated into a newline
