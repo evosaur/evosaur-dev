@@ -1,8 +1,11 @@
 #!/usr/bin/env python3
 
+# Usage of Exception() is to give an easy traceback, not to actually be used as an exception
+
+import math
+import glob
 import os
 import sys
-import glob
 
 datadir = os.path.abspath(os.path.dirname(__file__)+"/../cpu")
 
@@ -39,5 +42,55 @@ for ins in instructions:
 
 	info["params"] = int(num)
 
-print(instructions)
-print(num_instructions)
+print("Opcodes:", instructions)
+print("Opcode count:", num_instructions)
+instruction_bit_size = math.ceil(math.log2(num_instructions))
+print("Bits per opcode:", instruction_bit_size)
+
+argc = len(sys.argv)
+print("Number of args given:", argc)
+
+if argc < 2 or argc > 3:
+	raise Exception("Too few arguments given! Syntax: "+sys.argv[0]+" <input> [<output>]")
+
+if argc >= 3:
+	output = open(sys.argv[2], "wb")
+else:
+	output = open("/dev/stdout", "wb") # not going to fiddle with using fd 1 from python
+
+print("Using output file", output)
+
+try:
+	inputf = open(sys.argv[1], "r")
+except Exception:
+	print("Unable to open file `"+sys.argv[1]+"'! Exiting...")
+	os._exit(1)
+
+input = inputf.read()
+inputf.close()
+
+print(input)
+
+# first pass: evaluate instructions, calculate sizes, validate syntax
+linenum = 0
+in_queue = False
+last_queue_opcode = None
+for line in input.split('\n'):
+	linenum+=1
+	line = line.strip()
+
+	if line == "" or line[0] == ";":
+		continue
+
+	i=0
+	while i < len(line):
+		if line[i] == " " or line[i] == "	":
+			break
+		elif line[i] == "'" or line[i] == "\"" or line == "`":
+			raise Exception("Invalid instruction at line "+str(linenum)+": "+line)
+		i+=1
+
+	print(line[0:i])
+
+# second pass: calculate label addresses
+# third pass: evaluate parameter values, create binary output

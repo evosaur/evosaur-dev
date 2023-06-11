@@ -2,6 +2,8 @@ TODO: possibly simplify this to make it less of a pain to write
 
 Leading and trailing whitespace is ignored
 Comments start with ; and must not be inside "", '', or ``
+Comments must be preceeded by a space or tab if not at the start of the line
+
 \ is used for escaping; only applies to ", ', `, and itself when outside of quotations
 
 Data-at-address is indicated by [value], where value is anything valid to be used as an indirect reference
@@ -20,7 +22,9 @@ Instruction queues are surrounded by { and }:
 
 { and } must be on their own in the line (aside for whitespace and comments)
 
-Labels are any combination of non-whitespace from the start of the line to a ':', and not followed by any non-comment non-whitespace
+If an instruction is specified without { and }, it is considered to be an instruction queue of only that instruction
+
+Labels are any combination of non-whitespace non-quotation from the start of the line to a ':', and not followed by any non-comment non-whitespace
 Labels must not be declared inside instruction queues
 If a label includes { or }, it must start with {, then a number, then }, to be used as its default size; all other uses of these characters are invalid
 
