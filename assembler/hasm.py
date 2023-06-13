@@ -7,7 +7,9 @@ import glob
 import os
 import sys
 
-datadir = os.path.abspath(os.path.dirname(__file__)+"/../cpu")
+thisdir = os.path.abspath(os.path.dirname(__file__))
+
+datadir = os.path.abspath(thisdir+"/../cpu")
 
 paths = glob.glob(datadir+"/instructions/*/*")
 
@@ -44,8 +46,13 @@ for ins in instructions:
 
 print("Opcodes:", instructions)
 print("Opcode count:", num_instructions)
-instruction_bit_size = math.ceil(math.log2(num_instructions))
+instruction_bit_size = math.ceil(math.log2(num_instructions)) + 1 # + 1 for is_conditional
 print("Bits per opcode:", instruction_bit_size)
+
+# do this after reading the config
+f = open(thisdir+"/arbitrary_constants.py");
+exec(f.read())
+f.close()
 
 argc = len(sys.argv)
 print("Number of args given:", argc)
