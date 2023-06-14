@@ -22,6 +22,8 @@ Instruction queues are surrounded by { and }:
 
 { and } must be on their own in the line (aside for whitespace and comments)
 
+If a parameter (and just the parameter) is placed between [ and ], it will be considered an indirect reference; the memory pointed to by that will be used
+
 If an instruction is specified without { and }, it is considered to be an instruction queue of only that instruction
 
 Labels are any combination of non-whitespace non-quotation from the start of the line to a ':', and not followed by any non-comment non-whitespace

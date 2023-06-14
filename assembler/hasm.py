@@ -46,8 +46,8 @@ for ins in instructions:
 
 print("Opcodes:", instructions)
 print("Opcode count:", num_instructions)
-instruction_bit_size = math.ceil(math.log2(num_instructions)) + 1 # + 1 for is_conditional
-print("Bits per opcode:", instruction_bit_size)
+opcode_bit_size = math.ceil(math.log2(num_instructions)) + 1 # + 1 for is_conditional
+print("Bits per opcode:", opcode_bit_size)
 
 # do this after reading the config
 f = open(thisdir+"/arbitrary_constants.py");
@@ -78,7 +78,7 @@ inputf.close()
 
 print(input)
 
-# first pass: evaluate instructions, calculate sizes, validate syntax
+# first pass: evaluate instructions, calculate sizes, validate syntax, evaluate label addresses
 linenum = 0
 in_queue = False
 last_queue_opcode = None
@@ -99,5 +99,4 @@ for line in input.split('\n'):
 
 	print(line[0:i])
 
-# second pass: calculate label addresses
-# third pass: evaluate parameter values, create binary output
+# second pass: evaluate parameter values, create binary output
