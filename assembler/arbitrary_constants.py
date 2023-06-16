@@ -1,7 +1,15 @@
+# This value will eventually be a part of the assembly language itself and not a constant here
+
+current_mode = 128
+
+print("Assembling for mode:", current_mode)
+
 # These numbers don't change behavior much and aren't specified yet, but there being a number is required
 
-max_immediate_value_size = 64
+max_immediate_value_size = current_mode * 16
 immediate_bit_size = math.ceil(math.log2(max_immediate_value_size))
+
+print("Bits required to specify immediate references' size or an index into it:", immediate_bit_size)
 
 num_general_registers = 16
 num_segment_registers = 8
@@ -13,13 +21,9 @@ num_registers = num_general_registers + num_segment_registers + num_special_regi
 bits_for_register_selection = math.ceil(math.log2(num_registers))
 
 print("Number of different registers (total):", num_registers)
-print("Bits required to specify which of them:", bits_for_register_selection)
+print("Bits required to specify which register to use:", bits_for_register_selection)
 
-# this value will eventually be a part of the assembly language itself and not a constant here
 
-current_mode = 128
-
-print("Assembling for mode:", current_mode)
 
 bits_for_current_mode = math.log2(current_mode)
 if bits_for_current_mode//1 != bits_for_current_mode:
