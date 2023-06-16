@@ -5,7 +5,13 @@ start:
 }
 {8}end: 
 	; another comment
-: ; Zero-length label... why do I support this? Why not
+
 add_inplace r0, r1
+
+: ; Zero-length label... why do I support this? Why not
+
+declare "Hello, World!"
+
+total_size:
 
 ;blahblahblah invalid opcode ; currently handled properly, commented out now so it can actually process the rest

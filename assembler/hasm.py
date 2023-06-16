@@ -21,7 +21,7 @@ def my_int(size):
 		base = 16 # int() will remove the 0x
 	elif size[:-1] == "h":
 		if size[:2].lower() == "0x": # We don't want int() to silently remove this
-			raise Exception("Error at line "+str(linenum)+": Parameter size is not a valid number: "+input.split("\n")[instruction["linenum"]])
+			raise Exception("Error at line "+str(linenum)+": Parameter size is not a valid number: "+input.split("\n")[instruction["linenum"]-1])
 		base = 16
 	elif size[:2] == "0b":
 		base = 2 # As with 0x, int() will remove this
@@ -145,15 +145,24 @@ for line in input.split("\n"):
 				in_doublequote = False
 			elif not in_doublequote:
 				in_doublequote = True
+			escaped = False
 		elif line[i] == "`":
 			if in_backtick and not escaped:
 				in_backtick = False
 			elif not in_backtick:
 				in_backtick = True
+			escaped = False
 		elif line[i] == ";" and was_space:
 			break # rest is a comment
+		elif line[i] == "\\":
+			if not escaped:
+				escaped = True
+		elif escaped:
+			raise Exception("Error at line "+str(linenum)+": Unknown escape `"+line[i-1:i+1]+"': "+line)
+		else:
+			escaped = False
 
-		if line[i] == " " or line[i] == "	":
+		if (line[i] == " " or line[i] == "	") and not in_singlequote and not in_doublequote and not in_backtick:
 			old_was_space = was_space
 			was_space = (not in_singlequote and not in_doublequote and not in_backtick)
 			if was_space and not old_was_space:
@@ -269,10 +278,10 @@ def get_size(queue):
 			if parameter[-1] == "]":
 				tmp = parameter.split("[", maxsplit=1)
 				if len(tmp) != 2:
-					raise Exception("Error at line "+str(linenum)+": Parameter ends with ] but no matching [ was found: "+input.split("\n")[instruction["linenum"]])
+					raise Exception("Error at line "+str(linenum)+": Parameter ends with ] but no matching [ was found: "+input.split("\n")[instruction["linenum"]-1])
 				parameter = tmp[1][:-1]
 				if len(parameter) == 0:
-					raise Exception("Error at line "+str(linenum)+": Invalid parameter: "+input.split("\n")[instruction["linenum"]])
+					raise Exception("Error at line "+str(linenum)+": Invalid parameter: "+input.split("\n")[instruction["linenum"]-1])
 
 			this_size = current_mode
 			if parameter[0] == "{":
@@ -286,14 +295,14 @@ def get_size(queue):
 
 					i += 1
 				if i == len(parameter):
-					raise Exception("Error at line "+str(linenum)+": Parameter starts with { but doesn't contain a }: "+input.split("\n")[instruction["linenum"]])
+					raise Exception("Error at line "+str(linenum)+": Parameter starts with { but doesn't contain a }: "+input.split("\n")[instruction["linenum"]-1])
 
 				parameter = parameter[i+1:]
 
 				try:
 					this_size = my_int(this_size)
 				except ValueError:
-					raise Exception("Error at line "+str(linenum)+": Parameter size is not a valid number: "+input.split("\n")[instruction["linenum"]])
+					raise Exception("Error at line "+str(linenum)+": Parameter size is not a valid number: "+input.split("\n")[instruction["linenum"]-1])
 			elif parameter[-1] == ":":
 				this_size = labels[parameter[:-1]]["bits"]
 
@@ -313,7 +322,7 @@ def get_size(queue):
 					my_int(parameter)
 					size += this_size
 				except ValueError:
-					raise Exception("Error at line "+str(linenum)+": Unknown parameter: `"+parameter+"': "+input.split("\n")[instruction["linenum"]])
+					raise Exception("Error at line "+str(linenum)+": Unknown parameter: `"+parameter+"': "+input.split("\n")[instruction["linenum"]-1])
 
 	size += bits_for_flag_save_definition_size
 
@@ -338,8 +347,41 @@ for line in lines:
 		current_queue = []
 		in_queue = False
 	elif line["command"] == "declare":
-		pass # TODO: Declare
-	elif line["command"][:-1] == ":":
-		pass # TODO: Labels
+		for param in line["params"]:
+			if param[0] == "{":
+				try:
+					address += my_int(param[1:].split("}", maxsplit=1)[0])
+				except ValueError:
+					raise Exception("Error at line "+str(linenum)+": Invalid size specification: "+input.split("\n")[line["linenum"]-1])
+			elif param[0] == '"':
+				i = 1
+				escaped = False
+				size = 0
+				while i < len(param):
+					if param[i] == "\\" and not escaped:
+						escaped = True
+					elif param[i] != '"':
+						size += 8 # bc python and 8-bit byte modern computers
+						escaped = False
+					else:
+						if len(param) != i+1:
+							raise Exception("Error at line "+str(linenum)+": Characters remaining after the terminating \" "+input.split("\n")[line["linenum"]-1])
+					i += 1
+
+				address += size
+			elif param[0] == "`":
+				raise Exception("TODO: Define what can/can't be escaped here properly. (Assembler issue not an issue with your assembly)\n"+input.split("\n")[line["linenum"]-1])
+			elif param[-1] == ":":
+				address += labels[param[:-1]]["bits"]
+			else:
+				address += current_mode # Assume it's just a constant
+
+	elif line["command"][-1] == ":":
+		label = line["command"]
+		if label[0] == "{":
+			label = label.split("}", maxsplit=1)[1]
+		labels[label[:-1]]["address"] = address
+
+print(labels)
 
 # third pass: calculate parameter values, calculate immediate reference values, create binary output
