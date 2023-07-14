@@ -1,0 +1,15 @@
+Copyright (C) 2022--2023
+Test_User <hax@andrewyu.org>
+Andrew Yu <andrew@andrewyu.org>
+
+All rights reserved
+
+---
+Of course, this is not ideal. We do want to use a strong copyleft
+license, but the AGPL is not strong enough when it comes to patents.
+License proliferation is harmful in that combining works become harder,
+however this is less of a concern for Evosaur which seeks no
+compatibility with the existing world of computing.
+We don't want to risk it, so it's all rights reserved for now. Once
+license selection (or perhaps development) finishes, we'll switch to
+a strong copyleft license.
